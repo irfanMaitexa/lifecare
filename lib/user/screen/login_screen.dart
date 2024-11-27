@@ -143,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data['message']);  // For debugging
+      print(data);  // For debugging
 
       // Prepare user data in a Map
       Map<String, dynamic> user = {

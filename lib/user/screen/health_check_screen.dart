@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lifecare/constants.dart';
+import 'package:lifecare/db/db_serviece.dart';
 import 'package:lifecare/widgets/custom_button_widget.dart';
 import 'package:lifecare/widgets/custom_text_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HealthDataFormScreen extends StatefulWidget {
   @override
@@ -26,48 +29,110 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
 
   bool _isLoading = false; // Loading indicator state
 
-  // API request function
-  Future<void> submitHealthData() async {
+
+
+    // Load user data from SQLite
+  Future<void> _loadUserData() async {
+    _isLoading = true;
     setState(() {
-      _isLoading = true;
+      
     });
 
-    // Construct the data in the required format
-    final features = [
-      int.tryParse(ageController.text) ?? 0,
-      double.tryParse(bmiController.text) ?? 0.0,
-      int.parse(drinking ?? '0'),
-      int.parse(exercise ?? '1'),
-      int.parse(gender ?? '0'),
-      int.parse(junk ?? '1'),
-      int.parse(sleep ?? '1'),
-      int.parse(smoking ?? '0'),
-    ];
+        final dbHelper = DatabaseHelper.instance;
+    final userExists = await dbHelper.isUserExist();
 
-    // Define the URL and headers
-    final url = Uri.parse("https://0e43-117-202-52-82.ngrok-free.app/predict");
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'features': features});
+    if (userExists) {
+      // Assuming you're fetching the first user as an example
+      final users = await dbHelper.getUsers();
+      if (users.isNotEmpty) {
+        final user = users.first;
 
-    try {
-      final response = await http.post(url, headers: headers, body: body);
+        // Set the data to controllers and dropdowns
+        setState(() {
+          
 
-      if (response.statusCode == 200) {
-        // Handle successful response
-        print('Response: ${response.body}');
-        // You can also parse and show response data as needed
-      } else {
-        // Handle error
-        print('Failed to submit data: ${response.statusCode}');
+          // Calculate BMI (weight in kg / height in m²)
+          final heightInMeters = (user['height'] ?? 0) / 100.0; // Assuming height is in cm
+          final weight = user['weight'] ?? 0.0;
+          final bmi = (weight > 0 && heightInMeters > 0)
+              ? (weight / (heightInMeters * heightInMeters)).toStringAsFixed(2)
+              : '0.00';
+
+          bmiController.text = bmi; // Set calculated BMI
+          _isLoading = false;
+        });
       }
-    } catch (e) {
-      print('Error: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    } else {
+      print('No user data found in SQLite.');
     }
   }
+
+
+  
+  
+
+
+  Future<void> submitHealthData() async {
+  setState(() {
+    _isLoading = true;
+  });
+
+  final features = [
+    int.tryParse(ageController.text) ?? 0,
+    double.tryParse(bmiController.text) ?? 0.0,
+    int.parse(drinking ?? '0'),
+    int.parse(exercise ?? '1'),
+    int.parse(gender ?? '0'),
+    int.parse(junk ?? '1'),
+    int.parse(sleep ?? '1'),
+    int.parse(smoking ?? '0'),
+  ];
+
+  final url = Uri.parse("$baseUrl/predict");
+  final headers = {'Content-Type': 'application/json'};
+  final body = jsonEncode({'features': features});
+
+  try {
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      // Parse the response
+      final responseData = jsonDecode(response.body);
+
+      if (responseData['prediction'] != null) {
+        final prediction = responseData['prediction'];
+
+        // Save the prediction to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('health_prediction', prediction);
+
+        // Print to verify (optional)
+        print('Prediction saved: $prediction');
+
+        // Optionally, navigate to another screen or show a confirmation
+      } else {
+        print('Prediction key not found in response.');
+      }
+    } else {
+      print('Failed to submit data: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadUserData();
+  }
+
 
   @override
   Widget build(BuildContext context) {

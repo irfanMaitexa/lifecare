@@ -164,6 +164,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           body: json.encode(data), // Convert data to JSON
         );
 
+        print(response.body);
+
         setState(() {
           _isLoading = false; // Hide the loading indicator after the request
         });
