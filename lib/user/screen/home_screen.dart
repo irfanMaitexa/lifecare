@@ -33,10 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     disease = prefs.getString('health_prediction');
 
+    print(disease);
+
     if (disease != null) {
       try {
 
         isExCompleted = prefs.getString('exerciseCompletedDate') == null ?  false : true;
+
+        print(isExCompleted);
 
 
         final response = await http.post(
