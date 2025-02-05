@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lifecare/chat_bot_screen.dart';
 import 'package:lifecare/user/screen/daily_activity_screen.dart';
 
 class RecentActivityWidget extends StatelessWidget {
@@ -21,8 +22,9 @@ class RecentActivityWidget extends StatelessWidget {
         _buildActivityCard(
           color: Colors.purple,
           icon: Icons.fitness_center,
-          title: 'Workouts',
+          title: 'Chat bot',
           onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ChatbotScreen(),));
             
           },
         ),
