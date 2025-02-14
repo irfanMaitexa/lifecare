@@ -109,6 +109,8 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
         // Print to verify (optional)
         print('Prediction saved: $prediction');
 
+        Navigator.pop(context);
+
         // Optionally, navigate to another screen or show a confirmation
       } else {
         print('Prediction key not found in response.');

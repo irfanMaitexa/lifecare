@@ -348,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
       "Friday",
       "Saturday"
     ];
-    return weekDays[DateTime.now().weekday - 1];
+    return weekDays[DateTime.now().weekday];
   }
 
   Widget _buildRecoveryGoalsCard(List<dynamic> recoveryGoals) {

@@ -62,18 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Handle forgot password
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.green),
-                      ),
-                    ),
-                  ),
+                  
                   const SizedBox(height: 20),
                   _isLoading  // Show loading indicator when _isLoading is true
                       ? Center(child: CircularProgressIndicator())

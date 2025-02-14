@@ -274,8 +274,20 @@ class _EachExerciseDetailsScreenState extends State<EachExerciseDetailsScreen> {
                   ),
               
                   SizedBox(height: 30,),
+
+
+                  
+
+
+                  
+      
+      
               
-                  Text(widget.exerciseDetails['food'],style: TextStyle(fontWeight: FontWeight.bold),),
+                   Text('Break fast :   ${widget.exerciseDetails['food']['morning']}',style: TextStyle(fontWeight: FontWeight.bold),),
+                   SizedBox(height: 10,),
+                   Text('Lunch :   ${widget.exerciseDetails['food']['lunch']}',style: TextStyle(fontWeight: FontWeight.bold),),
+                    SizedBox(height: 10,),
+                   Text('Dinner :   ${widget.exerciseDetails['food']['dinner']}',style: TextStyle(fontWeight: FontWeight.bold),),
                   SizedBox(height: 30,),
               
                   if(widget.isToday)
