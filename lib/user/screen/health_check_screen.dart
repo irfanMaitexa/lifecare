@@ -174,7 +174,7 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
                 ),
                 SizedBox(height: 16),
                 _buildDropdown(
-                  label: 'Drinking',
+                  label: 'Alcoholic consumption',
                   value: drinking,
                   items: {'0': 'No', '1': 'Yes'},
                   onChanged: (val) => setState(() => drinking = val),
