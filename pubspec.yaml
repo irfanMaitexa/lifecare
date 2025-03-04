@@ -45,6 +45,8 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   workmanager: ^0.5.2
   timezone: ^0.10.0
+  youtube_player_flutter: ^9.1.1
+  video_player: ^2.9.3
 
 dev_dependencies:
   flutter_test:

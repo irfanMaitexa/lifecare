@@ -29,16 +29,12 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
 
   bool _isLoading = false; // Loading indicator state
 
-
-
-    // Load user data from SQLite
+  // Load user data from SQLite
   Future<void> _loadUserData() async {
     _isLoading = true;
-    setState(() {
-      
-    });
+    setState(() {});
 
-        final dbHelper = DatabaseHelper.instance;
+    final dbHelper = DatabaseHelper.instance;
     final userExists = await dbHelper.isUserExist();
 
     if (userExists) {
@@ -47,18 +43,16 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
       if (users.isNotEmpty) {
         final user = users.first;
 
-        // Set the data to controllers and dropdowns
+        // Calculate BMI (weight in kg / height in m²)
+        final heightInMeters = (user['height'] ?? 0) / 100.0; // Assuming height is in cm
+        final weight = user['weight'] ?? 0.0;
+        final bmi = (weight > 0 && heightInMeters > 0)
+            ? (weight / (heightInMeters * heightInMeters)).toStringAsFixed(2)
+            : '0.00';
+
         setState(() {
-          
-
-          // Calculate BMI (weight in kg / height in m²)
-          final heightInMeters = (user['height'] ?? 0) / 100.0; // Assuming height is in cm
-          final weight = user['weight'] ?? 0.0;
-          final bmi = (weight > 0 && heightInMeters > 0)
-              ? (weight / (heightInMeters * heightInMeters)).toStringAsFixed(2)
-              : '0.00';
-
-          bmiController.text = bmi; // Set calculated BMI
+          // Set the calculated BMI as a hint or placeholder
+          bmiController.text = bmi.toString(); // Clear the text to allow user input
           _isLoading = false;
         });
       }
@@ -67,74 +61,66 @@ class _HealthDataFormScreenState extends State<HealthDataFormScreen> {
     }
   }
 
-
-  
-  
-
-
   Future<void> submitHealthData() async {
-  setState(() {
-    _isLoading = true;
-  });
-
-  final features = [
-    int.tryParse(ageController.text) ?? 0,
-    double.tryParse(bmiController.text) ?? 0.0,
-    int.parse(drinking ?? '0'),
-    int.parse(exercise ?? '1'),
-    int.parse(gender ?? '0'),
-    int.parse(junk ?? '1'),
-    int.parse(sleep ?? '1'),
-    int.parse(smoking ?? '0'),
-  ];
-
-  final url = Uri.parse("$baseUrl/predict");
-  final headers = {'Content-Type': 'application/json'};
-  final body = jsonEncode({'features': features});
-
-  try {
-    final response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      // Parse the response
-      final responseData = jsonDecode(response.body);
-
-      if (responseData['prediction'] != null) {
-        final prediction = responseData['prediction'];
-
-        // Save the prediction to SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('health_prediction', prediction);
-
-        // Print to verify (optional)
-        print('Prediction saved: $prediction');
-
-        Navigator.pop(context);
-
-        // Optionally, navigate to another screen or show a confirmation
-      } else {
-        print('Prediction key not found in response.');
-      }
-    } else {
-      print('Failed to submit data: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error: $e');
-  } finally {
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
+
+    final features = [
+      int.tryParse(ageController.text) ?? 0,
+      double.tryParse(bmiController.text) ?? 0.0,
+      int.parse(drinking ?? '0'),
+      int.parse(exercise ?? '1'),
+      int.parse(gender ?? '0'),
+      int.parse(junk ?? '1'),
+      int.parse(sleep ?? '1'),
+      int.parse(smoking ?? '0'),
+    ];
+
+    final url = Uri.parse("$baseUrl/predict");
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'features': features});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        // Parse the response
+        final responseData = jsonDecode(response.body);
+
+        if (responseData['prediction'] != null) {
+          final prediction = responseData['prediction'];
+
+          // Save the prediction to SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('health_prediction', prediction);
+
+          // Print to verify (optional)
+          print('Prediction saved: $prediction');
+
+          Navigator.pop(context);
+
+          // Optionally, navigate to another screen or show a confirmation
+        } else {
+          print('Prediction key not found in response.');
+        }
+      } else {
+        print('Failed to submit data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
-}
 
-
-@override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _loadUserData();
   }
-
 
   @override
   Widget build(BuildContext context) {
